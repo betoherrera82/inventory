@@ -1,0 +1,99 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:aop="http://www.springframework.org/schema/aop"
+	xmlns:context="http://www.springframework.org/schema/context"
+	xmlns:mvc="http://www.springframework.org/schema/mvc" xmlns:sec="http://www.springframework.org/schema/security"
+	xmlns:jee="http://www.springframework.org/schema/jee" xmlns:task="http://www.springframework.org/schema/task"
+	xmlns:c="http://www.springframework.org/schema/c" xmlns:tx="http://www.springframework.org/schema/tx"
+	xmlns:util="http://www.springframework.org/schema/util" xmlns:solr="http://www.springframework.org/schema/data/solr"
+
+	xsi:schemaLocation="http://www.springframework.org/schema/security http://www.springframework.org/schema/security/spring-security-4.1.xsd
+		http://www.springframework.org/schema/mvc http://www.springframework.org/schema/mvc/spring-mvc-4.1.xsd
+		http://www.springframework.org/schema/jee http://www.springframework.org/schema/jee/spring-jee-4.1.xsd
+		http://www.springframework.org/schema/task http://www.springframework.org/schema/task/spring-task-4.1.xsd
+		http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans-4.1.xsd
+		http://www.springframework.org/schema/context http://www.springframework.org/schema/context/spring-context-4.1.xsd
+		http://www.springframework.org/schema/aop http://www.springframework.org/schema/aop/spring-aop-4.1.xsd
+		http://www.springframework.org/schema/tx http://www.springframework.org/schema/tx/spring-tx-4.1.xsd
+        http://www.springframework.org/schema/util http://www.springframework.org/schema/util/spring-util-4.1.xsd
+        http://www.springframework.org/schema/data/solr http://www.springframework.org/schema/data/solr/spring-solr-2.0.xsd">
+
+	<!-- Configuracion de core -->
+	<context:annotation-config />
+	<context:component-scan base-package="com.axe" />
+
+	<!-- Habilita anotaciones para MVC (Controllers) -->
+	<mvc:annotation-driven />
+
+	<!-- Configuracion del connection pool -->
+	<bean id="datasource" class="org.apache.commons.dbcp2.BasicDataSource">
+		<property name="driverClassName" value="com.mysql.jdbc.Driver"></property>
+		<property name="url" value="jdbc:mysql://localhost:3306/inventory"></property>
+		<property name="username" value="inventory"></property>
+		<property name="password" value="Destroyer.123"></property>
+		<property name="initialSize" value="10" />
+		<property name="maxTotal" value="50" />
+		<property name="maxIdle" value="5" />
+	</bean>
+
+	<!-- Configuracion de entidades de hibernate -->
+	<bean id="sessionFactory"
+		class="org.springframework.orm.hibernate5.LocalSessionFactoryBean">
+		<property name="dataSource" ref="datasource" />
+		<property name="packagesToScan" value="com.axe.inventory.data.entities" />
+		<property name="hibernateProperties">
+			<props>
+				<prop key="hibernate.dialect">org.hibernate.dialect.MySQLDialect</prop>
+				<prop key="hibernate.cache.provider_class">org.hibernate.cache.NoCacheProvider</prop>
+				<prop key="current_session_context_class">thread</prop>
+				<prop key="hibernate.show_sql">false</prop>
+				<prop key="hibernate.format_sql">false</prop>
+			</props>
+		</property>
+	</bean>
+
+	<!-- Transaction Manager -->
+	<tx:annotation-driven transaction-manager="transactionManager" />
+	
+	<bean id="transactionManager"
+		class="org.springframework.orm.hibernate5.HibernateTransactionManager">
+		<property name="sessionFactory" ref="sessionFactory" />
+	</bean>
+
+	<!-- Configuracion de seguridad -->
+	
+	<!-- 
+	<sec:http auto-config="false" use-expressions="true">
+		<sec:csrf disabled="true" />
+		<sec:intercept-url pattern="/" access="permitAll" />
+		<sec:intercept-url pattern="/secure/**" access="hasAnyRole('ROLE_CLIENTE', 'ROLE_ADMIN')"/>
+		<sec:intercept-url pattern="/servicio/seguridad/**" access="hasAnyRole('ROLE_CLIENTE', 'ROLE_ADMIN')" />
+		<sec:intercept-url pattern="/service/catalogos/**" access="permitAll" />
+
+		<sec:form-login login-page="/login.jsp"
+			authentication-failure-url="/login.jsp?error=1"
+			always-use-default-target="true" username-parameter="j_username"
+			password-parameter="j_password" login-processing-url="/j_spring_security_check"
+			authentication-success-handler-ref="autenticacionExitosaManejador" />
+
+		<sec:logout logout-url="/logout" logout-success-url="/secure/index.jsp"
+			invalidate-session="true" />
+
+		<sec:custom-filter ref="accesoFiltro" after="SECURITY_CONTEXT_FILTER"/>
+	</sec:http>
+	 -->
+
+	<!-- Configuracion del servicio de autenticacion -->
+	
+	<!-- 
+	<sec:authentication-manager>
+		<sec:authentication-provider
+			user-service-ref="autenticacionServicio">
+			<sec:password-encoder hash="sha-256" />
+		</sec:authentication-provider>
+	</sec:authentication-manager>
+	 -->
+
+	<!-- Habilita las tareas con anotaciones -->
+	<task:annotation-driven />
+</beans>
